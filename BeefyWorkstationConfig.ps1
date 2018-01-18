@@ -28,8 +28,8 @@ $DisabledExecutableFileTypes = @(
 )
 
 $DisabledWindowsOptionalFeatures = @(
-    'MicrosoftWindowsPowerShellV2',
-    'MicrosoftWindowsPowerShellV2Root',
+    #'MicrosoftWindowsPowerShellV2', # Including PowerShell 2 features causes multiple failures of DSC.
+    #'MicrosoftWindowsPowerShellV2Root',
     'SMB1Protocol-Client',
     'SMB1Protocol-Server',
     'SMB1Protocol'
@@ -70,7 +70,7 @@ $Configuration =
             EnforceNBTCPIP                  = $true
         },
 
-        # Node 'localhost'. OVERRIDE HERE.
+        # Node 'localhost'. OVERRIDE HERE. Pattern on above.
         @{
             NodeName                        = 'localhost'
         }
@@ -90,6 +90,7 @@ Configuration BeefyWorkstationConfigLCM
         {
             ConfigurationMode              = 'ApplyAndAutoCorrect'
             ConfigurationModeFrequencyMins = 90
+            StatusRetentionTimeInDays      = 10
         }
     }
 }
@@ -199,22 +200,21 @@ Configuration BeefyWorkstationConfig
     # Aggregate actions over all adapters blindly rather than trying to generate a list of adapters and configs at compile time.
     Node $AllNodes.Where{ $_.EnforceNBTCPIP }.NodeName
     {
-        Script NetBIOS
+        Script NetBIOSOverTCPIP
         {
             GetScript = {
-                @{ 'Result' = [System.Convert]::ToBoolean( ( Get-WmiObject -Class 'win32_networkadapterconfiguration' | ForEach-Object { $_.TcpipNetbiosOptions } | Measure-Object -Sum ).Sum ).ToString() }
+                @{ 'Result' = [System.Convert]::ToBoolean( ( Get-CimInstance -ClassName 'Win32_NetworkAdapterConfiguration' | Select-Object -ExpandProperty 'TcpipNetbiosOptions' | Where-Object { ( $_ -ne $null ) -and ( $_ -ne 2 ) } | Measure-Object -Sum ).Sum ).ToString() }
             }
 
             SetScript = {
-                Get-WmiObject -Class 'win32_networkadapterconfiguration' | ForEach-Object { $_.SetTcpipNetbios(2) } | Out-Null
+                Get-CimInstance -ClassName 'Win32_NetworkAdapterConfiguration' | Invoke-CimMethod -MethodName 'SetTcpipNetbios' -Arguments @{ 'TcpipNetbiosOptions' = 2 } | Out-Null
             }
 
             TestScript = {
-                [System.Convert]::ToBoolean( ( Get-WmiObject -Class 'win32_networkadapterconfiguration' | ForEach-Object { $_.TcpipNetbiosOptions } | Measure-Object -Sum ).Sum )
+                -not [System.Convert]::ToBoolean( ( Get-CimInstance -ClassName 'Win32_NetworkAdapterConfiguration' | Select-Object -ExpandProperty 'TcpipNetbiosOptions' | Where-Object { ( $_ -ne $null ) -and ( $_ -ne 2 ) } | Measure-Object -Sum ).Sum )
             }
         }
     }
-    
 
     #### Untoggable items.
     Node $AllNodes.NodeName

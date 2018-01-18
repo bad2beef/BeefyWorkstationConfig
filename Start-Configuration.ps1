@@ -18,11 +18,11 @@ If ( ( Get-PackageProvider | Select-Object -ExpandProperty Name ) -notcontains '
     Install-PackageProvider -Name NuGet
 }
 
-Write-Host 'Installing required DSC modules.'
+Write-Host 'Installing or updating required DSC modules.'
 $ModuleList = Get-Module -ListAvailable | Select-Object -ExpandProperty Name
-If ( $ModuleList -notcontains 'xSystemSecurity' ){ Install-Module -Name xSystemSecurity }
-If ( $ModuleList -notcontains 'xWindowsUpdate' ){ Install-Module -Name xWindowsUpdate }
-If ( $ModuleList -notcontains 'xWinEventLog' ){ Install-Module -Name xWinEventLog }
+If ( $ModuleList -notcontains 'xSystemSecurity' ){ Install-Module -Name xSystemSecurity } Else { Update-Module -Name xSystemSecurity }
+If ( $ModuleList -notcontains 'xWindowsUpdate' ){ Install-Module -Name xWindowsUpdate } Else { Update-Module -Name xWindowsUpdate }
+If ( $ModuleList -notcontains 'xWinEventLog' ){ Install-Module -Name xWinEventLog } Else { Update-Module -Name xWinEventLog }
 
 # Build configuration
 Write-Host 'Sourcing configuration.'
