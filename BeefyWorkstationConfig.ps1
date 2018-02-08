@@ -226,7 +226,23 @@ Configuration BeefyWorkstationConfig
             Setting = 'AlwaysNotify'
         }
 
-        # Disable Start menu web search.
+        # Disable AutoRun
+        Registry NoDriveTypeAutoRun
+        {
+            Ensure    = 'Present'
+            Key       = 'HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer'
+            ValueName = 'NoDriveTypeAutoRun'
+            ValueData = 255
+        }
+
+        # Disable Cortana Start menu web search.
+        Registry AllowCortana
+        {
+            Ensure    = 'Present'
+            Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
+            ValueName = 'AllowCortana'
+            ValueData = 0
+        }
         Registry DisableWebConnectedSearch
         {
             Ensure    = 'Present'
@@ -278,6 +294,13 @@ Configuration BeefyWorkstationConfig
             ValueName = 'EnableDCOM'
             ValueData = 'N'
         }
+        Registry DCOMProtocols
+        {
+            Ensure    = 'Present'
+            Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Rpc'
+            ValueName = 'DCOM Protocols'
+            ValueData = ''
+        }
 
         # Force NTLMv2 only
         Registry LmCompatibilityLevel
@@ -286,6 +309,15 @@ Configuration BeefyWorkstationConfig
             Key       = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa'
             ValueName = 'LmCompatibilityLevel'
             ValueData = 5
+        }
+
+        # Disable WDigest
+        Registry UseLogonCredential
+        {
+            Ensure    = 'Present'
+            Key       = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest'
+            ValueName = 'UseLogonCredential'
+            ValueData = 0
         }
 
         # Disable WPAD Service
