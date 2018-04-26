@@ -14,9 +14,10 @@ Get-Member -InputObject $Software.'choco-install' -MemberType NoteProperty | For
     If ( $Version -notlike 'latest' )
     {
         choco install $_.Name --version $Version --yes
+        choco pin add --name $_.Name --version $Version
     }
     Else
     {
-        choco install $_.Name
+        choco install $_.Name --yes
     }
 }
