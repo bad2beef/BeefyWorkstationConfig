@@ -47,6 +47,7 @@ $HardenPerUser = {
 
     Set-ItemProperty -Force -Name 'HideFileExt' -Value 0 -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
     Set-ItemProperty -Force -Name 'HideDrivesWithNoMedia' -Value 0 -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+    Set-ItemProperty -Force -Name 'HidePeopleBar' -Value 1 -Path 'HKCU:\Software\Policies\Microsoft\Windows\Explore'
 
     Set-ItemProperty -Force -Name 'Enabled' -Value 0 -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo'
 }
@@ -68,11 +69,23 @@ $Configuration =
             EnforceEventLog                 = $true
             EnforceIEESC                    = $true
             EnforceNBTCPIP                  = $true
+            EnforceDeviceGuard              = $true
         },
-
+        
         # Node 'localhost'. OVERRIDE HERE. Pattern on above.
         @{
             NodeName                        = 'localhost'
+            DisabledExecutableFileTypes     = $DisabledExecutableFileTypes
+            DisabledWindowsOptionalFeatures = $DisabledWindowsOptionalFeatures
+            DisabledServices                = $DisabledServices
+            EnforceExecutableFileTypes      = $true
+            EnforceWindowsOptionalFeatures  = $true
+            EnforceServices                 = $true
+            EnforceWindowsUpdate            = $true
+            EnforceEventLog                 = $true
+            EnforceIEESC                    = $true
+            EnforceNBTCPIP                  = $true
+            EnforceDeviceGuard              = $false # Default to off, as on prevents some virtualization software from working.
         }
     )
 }
@@ -150,7 +163,7 @@ Configuration BeefyWorkstationConfig
             Category         = @( 'Security', 'Important', 'Optional' )
             Notifications    = 'ScheduledInstallation'
             Source           = 'MicrosoftUpdate' # Or WindowsUpdate for Windows-only
-            UpdateNow        = $true
+            UpdateNow        = $false
             IsSingleInstance = 'Yes'
         }
     }
@@ -213,6 +226,18 @@ Configuration BeefyWorkstationConfig
             TestScript = {
                 -not [System.Convert]::ToBoolean( ( Get-CimInstance -ClassName 'Win32_NetworkAdapterConfiguration' | Select-Object -ExpandProperty 'TcpipNetbiosOptions' | Where-Object { ( $_ -ne $null ) -and ( $_ -ne 2 ) } | Measure-Object -Sum ).Sum )
             }
+        }
+    }
+
+    #### OS Protection
+    Node $AllNodes.Where{ $_.EnforceDeviceGuard }.NodeName
+    {
+        Registry NoDriveTypeAutoRun
+        {
+            Ensure    = 'Present'
+            Key       = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity'
+            ValueName = 'Enabled'
+            ValueData = 1
         }
     }
 

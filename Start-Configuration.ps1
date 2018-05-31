@@ -41,9 +41,9 @@ BeefyWorkstationConfig -ConfigurationData $Configuration | Out-Null
 
 Write-Host "`tInstalling."
 $Configuration = [Byte[]][System.IO.File]::ReadAllBytes( ( Resolve-Path -Path '.\BeefyWorkstationConfig\localhost.mof' ) )
-Invoke-WmiMethod -Namespace 'root/Microsoft/Windows/DesiredStateConfiguration' -Class 'MSFT_DSCLocalConfigurationManager' -Name 'SendConfigurationApply' -ArgumentList @( $Configuration, [System.UInt32]1 )
+Invoke-WmiMethod -Namespace 'root/Microsoft/Windows/DesiredStateConfiguration' -Class 'MSFT_DSCLocalConfigurationManager' -Name 'SendConfiguration' -ArgumentList @( $Configuration, [System.UInt32]1 )
 
-Write-Host 'Forcing additional configuration run.'
+Write-Host 'Forcing configuration application.'
 Invoke-WmiMethod -Namespace 'root/Microsoft/Windows/DesiredStateConfiguration' -Class 'MSFT_DSCLocalConfigurationManager' -Name 'ApplyConfiguration' -ArgumentList @( [bool]$true )
 
 Write-Host 'Done.'
