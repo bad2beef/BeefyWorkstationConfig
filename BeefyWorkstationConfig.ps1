@@ -67,6 +67,7 @@ $Configuration =
             EnforceServices                 = $true
             EnforceWindowsUpdate            = $true
             EnforceEventLog                 = $true
+            EnforcePowerShellLogging        = $true
             EnforceIEESC                    = $true
             EnforceNBTCPIP                  = $true
             EnforceDeviceGuard              = $true
@@ -75,16 +76,6 @@ $Configuration =
         # Node 'localhost'. OVERRIDE HERE. Pattern on above.
         @{
             NodeName                        = 'localhost'
-            DisabledExecutableFileTypes     = $DisabledExecutableFileTypes
-            DisabledWindowsOptionalFeatures = $DisabledWindowsOptionalFeatures
-            DisabledServices                = $DisabledServices
-            EnforceExecutableFileTypes      = $true
-            EnforceWindowsOptionalFeatures  = $true
-            EnforceServices                 = $true
-            EnforceWindowsUpdate            = $true
-            EnforceEventLog                 = $true
-            EnforceIEESC                    = $true
-            EnforceNBTCPIP                  = $true
             EnforceDeviceGuard              = $false # Default to off, as on prevents some virtualization software from working.
         }
     )
@@ -191,6 +182,31 @@ Configuration BeefyWorkstationConfig
             IsEnabled          = $true
             LogMode            = 'Circular'
             MaximumSizeInBytes = 196mb
+        }
+    }
+
+    Node $AllNodes.Where{ $_.EnforcePowerShellLogging }.NodeName
+    {
+        Registry EnableScriptBlockLogging
+        {
+            Ensure    = 'Present'
+            Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging'
+            ValueName = 'EnableScriptBlockLogging'
+            ValueData = 1
+        }
+        Registry EnableModuleLogging
+        {
+            Ensure    = 'Present'
+            Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ModuleLogging'
+            ValueName = 'EnableModuleLogging'
+            ValueData = 1
+        }
+        Registry EnableModuleLoggingModules
+        {
+            Ensure    = 'Present'
+            Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ModuleLogging\ModuleNames '
+            ValueName = '*'
+            ValueData = '*'
         }
     }
 
