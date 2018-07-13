@@ -3,6 +3,7 @@
 ########
 # Prerequisites
 Write-Host 'Setting prerequisite settings.'
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 If ( ( Get-ExecutionPolicy -Scope LocalMachine ) -in @( 'Default', 'Restricted', 'Undefined' ) )
 {
     Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy RemoteSigned
