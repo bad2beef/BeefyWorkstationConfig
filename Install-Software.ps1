@@ -21,3 +21,7 @@ Get-Member -InputObject $Software.'choco-install' -MemberType NoteProperty | For
         choco install $_.Name --yes
     }
 }
+
+Get-Member -InputObject $Software.'vscode-install' -MemberType NoteProperty | ForEach-Object {
+    code --install-extension $_
+}

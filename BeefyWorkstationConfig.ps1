@@ -369,7 +369,7 @@ Configuration BeefyWorkstationConfig
             StartupType = 'Disabled'
             State       = 'Stopped'
         }
-        
+
         #### Privacy
         # Disable Telemetry
         Registry AllowTelemetry
