@@ -38,7 +38,6 @@ $DisabledWindowsOptionalFeatures = @(
 $DisabledServices = @(
     'iphlpsvc',
     'NetTcpPortSharing',
-    'RasMan',
     'RemoteRegistry'
 )
 
@@ -59,6 +58,7 @@ $Configuration =
         # Default data. DO NOT MODIFY.
         @{
             NodeName                        = '*'
+            ConfigurationModeFrequencyMins  = 90
             DisabledExecutableFileTypes     = $DisabledExecutableFileTypes
             DisabledWindowsOptionalFeatures = $DisabledWindowsOptionalFeatures
             DisabledServices                = $DisabledServices
@@ -93,7 +93,7 @@ Configuration BeefyWorkstationConfigLCM
         Settings
         {
             ConfigurationMode              = 'ApplyAndAutoCorrect'
-            ConfigurationModeFrequencyMins = 90
+            ConfigurationModeFrequencyMins = $Configuration.AllNodes[0].ConfigurationModeFrequencyMins
             StatusRetentionTimeInDays      = 10
         }
     }
@@ -102,9 +102,26 @@ Configuration BeefyWorkstationConfigLCM
 Configuration BeefyWorkstationConfig
 {
     Import-DscResource -ModuleName PSDesiredStateConfiguration
+    Import-DscResource -ModuleName ComputerManagementDsc
     Import-DscResource -ModuleName xSystemSecurity
     Import-DscResource -ModuleName xWindowsUpdate
     Import-DscResource -ModuleName xWinEventLog
+
+    Node $AllNodes.NodeName
+    {
+        ScheduledTask ConsistencyCheck
+        {
+            TaskName                = 'BeefyWorkstationConfig ConsistencyCheck'
+            TaskPath                = '\BeefyWorkstationConfig'
+            ActionExecutable        = [System.Environment]::ExpandEnvironmentVariables( '%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe' )
+            ActionArguments         = '-Exec Bypass -NoP -Win Hidden -C "Invoke-CimMethod -Namespace ''root/Microsoft/Windows/DesiredStateConfiguration'' -ClassName ''MSFT_DscTimer'' -Name ''StartDscTimer''"'
+            ScheduleType            = 'AtStartup'
+            RunLevel                = 'Highest'
+            AllowStartIfOnBatteries = $True
+            DisallowDemandStart     = $True
+            MultipleInstances       = 'IgnoreNew'
+        }
+    }
 
     #### Base OS
     Node $AllNodes.Where{ $_.EnforceExecutableFileTypes }.NodeName

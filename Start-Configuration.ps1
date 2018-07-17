@@ -21,6 +21,7 @@ If ( ( Get-PackageProvider | Select-Object -ExpandProperty Name ) -notcontains '
 
 Write-Host 'Installing or updating required DSC modules.'
 $ModuleList = Get-Module -ListAvailable | Select-Object -ExpandProperty Name
+If ( $ModuleList -notcontains 'ComputerManagementDsc' ){ Install-Module -Name ComputerManagementDscy } Else { Update-Module -Name ComputerManagementDsc }
 If ( $ModuleList -notcontains 'xSystemSecurity' ){ Install-Module -Name xSystemSecurity } Else { Update-Module -Name xSystemSecurity }
 If ( $ModuleList -notcontains 'xWindowsUpdate' ){ Install-Module -Name xWindowsUpdate } Else { Update-Module -Name xWindowsUpdate }
 If ( $ModuleList -notcontains 'xWinEventLog' ){ Install-Module -Name xWinEventLog } Else { Update-Module -Name xWinEventLog }
@@ -44,7 +45,13 @@ Write-Host "`tInstalling."
 $Configuration = [Byte[]][System.IO.File]::ReadAllBytes( ( Resolve-Path -Path '.\BeefyWorkstationConfig\localhost.mof' ) )
 Invoke-WmiMethod -Namespace 'root/Microsoft/Windows/DesiredStateConfiguration' -Class 'MSFT_DSCLocalConfigurationManager' -Name 'SendConfiguration' -ArgumentList @( $Configuration, [System.UInt32]1 )
 
-Write-Host 'Forcing configuration application.'
+Write-Host 'Applying configuration.'
 Invoke-WmiMethod -Namespace 'root/Microsoft/Windows/DesiredStateConfiguration' -Class 'MSFT_DSCLocalConfigurationManager' -Name 'ApplyConfiguration' -ArgumentList @( [bool]$true )
+
+Write-Host "`tRunning first consistency check."
+Invoke-WmiMethod -Namespace 'root/Microsoft/Windows/DesiredStateConfiguration' -Class 'MSFT_DSCLocalConfigurationManager' -Name 'PerformRequiredConfigurationChecks' -ArgumentList @( [System.UInt32]1 )
+
+Write-Host "`tStarting timer."
+Invoke-WmiMethod -Namespace 'root/Microsoft/Windows/DesiredStateConfiguration' -Class 'MSFT_DscTimer' -Name 'StartDsCTimer'
 
 Write-Host 'Done.'
