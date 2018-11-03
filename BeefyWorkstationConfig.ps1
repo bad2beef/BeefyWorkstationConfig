@@ -42,13 +42,13 @@ $DisabledServices = @(
 )
 
 $HardenPerUser = {
-    Set-ItemProperty -Force -Name 'WpadOverride' -Value 1 -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad'
+    Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad' -Name 'WpadOverride' -Value 1  -Force
 
-    Set-ItemProperty -Force -Name 'HideFileExt' -Value 0 -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
-    Set-ItemProperty -Force -Name 'HideDrivesWithNoMedia' -Value 0 -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
-    Set-ItemProperty -Force -Name 'HidePeopleBar' -Value 1 -Path 'HKCU:\Software\Policies\Microsoft\Windows\Explore'
+    Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideFileExt' -Value 0 
+    Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'HideDrivesWithNoMedia' -Value 0
+    Set-ItemProperty -Path 'HKCU:\Software\Policies\Microsoft\Windows\Explore' -Name 'HidePeopleBar' -Value 1
 
-    Set-ItemProperty -Force -Name 'Enabled' -Value 0 -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo'
+    Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo' -Name 'Enabled' -Value 0
 }
 
 $Configuration =
@@ -102,7 +102,7 @@ Configuration BeefyWorkstationConfigLCM
 Configuration BeefyWorkstationConfig
 {
     Import-DscResource -ModuleName PSDesiredStateConfiguration
-    Import-DscResource -ModuleName ComputerManagementDsc
+    Import-DscResource -ModuleName ComputerManagementDsc -ModuleVersion '6.0.0.0'
     Import-DscResource -ModuleName xSystemSecurity
     Import-DscResource -ModuleName xWindowsUpdate
     Import-DscResource -ModuleName xWinEventLog
@@ -270,6 +270,7 @@ Configuration BeefyWorkstationConfig
             Ensure    = 'Present'
             Key       = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity'
             ValueName = 'Enabled'
+            ValueType = 'Dword'
             ValueData = 1
         }
     }
@@ -278,10 +279,22 @@ Configuration BeefyWorkstationConfig
     Node $AllNodes.NodeName
     {
         #### GUI
-        # Force enable UAC.
-        xUAC UAC
+        # Force enable UAC. UAC prompts for credentials rather than consent. (Anti-Rubber Ducky)
+        Registry ConsentPromptBehaviorAdmin
         {
-            Setting = 'AlwaysNotify'
+            Ensure    = 'Present'
+            Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+            ValueName = 'ConsentPromptBehaviorAdmin'
+            ValueType = 'Dword'
+            ValueData = 1
+        }
+        Registry ConsentPromptBehaviorUser
+        {
+            Ensure    = 'Present'
+            Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+            ValueName = 'ConsentPromptBehaviorUser'
+            ValueType = 'Dword'
+            ValueData = 1
         }
 
         # Disable AutoRun
@@ -290,6 +303,7 @@ Configuration BeefyWorkstationConfig
             Ensure    = 'Present'
             Key       = 'HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer'
             ValueName = 'NoDriveTypeAutoRun'
+            ValueType = 'Dword'
             ValueData = 255
         }
 
@@ -299,6 +313,7 @@ Configuration BeefyWorkstationConfig
             Ensure    = 'Present'
             Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
             ValueName = 'AllowCortana'
+            ValueType = 'Dword'
             ValueData = 0
         }
         Registry DisableWebConnectedSearch
@@ -306,6 +321,7 @@ Configuration BeefyWorkstationConfig
             Ensure    = 'Present'
             Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
             ValueName = 'ConnectedSearchUseWeb'
+            ValueType = 'Dword'
             ValueData = 0
         }
         Registry DisableWebSearch
@@ -313,6 +329,7 @@ Configuration BeefyWorkstationConfig
             Ensure    = 'Present'
             Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
             ValueName = 'DisableWebSearch'
+            ValueType = 'Dword'
             ValueData = 1
         }
 
@@ -322,6 +339,7 @@ Configuration BeefyWorkstationConfig
             Ensure    = 'Present'
             Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
             ValueName = 'DisableCad'
+            ValueType = 'Dword'
             ValueData = 0
         }
 
@@ -331,6 +349,7 @@ Configuration BeefyWorkstationConfig
             Ensure    = 'Present'
             Key       = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel'
             ValueName = 'MitigationOptions'
+            ValueType = 'Qword'
             ValueData = 1000000000000
         }
 
@@ -341,6 +360,7 @@ Configuration BeefyWorkstationConfig
             Ensure    = 'Present'
             Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config'
             ValueName = 'DownloadMode'
+            ValueType = 'Dword'
             ValueData = 0
         }
 
@@ -366,6 +386,7 @@ Configuration BeefyWorkstationConfig
             Ensure    = 'Present'
             Key       = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa'
             ValueName = 'LmCompatibilityLevel'
+            ValueType = 'Dword'
             ValueData = 5
         }
 
@@ -375,6 +396,7 @@ Configuration BeefyWorkstationConfig
             Ensure    = 'Present'
             Key       = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest'
             ValueName = 'UseLogonCredential'
+            ValueType = 'Dword'
             ValueData = 0
         }
 
@@ -394,6 +416,7 @@ Configuration BeefyWorkstationConfig
             Ensure    = 'Present'
             Key       = 'HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\DataCollection'
             ValueName = 'AllowTelemetry'
+            ValueType = 'Dword'
             ValueData = 0
         }
 
