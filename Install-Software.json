@@ -1,14 +1,14 @@
 {
 	"choco-install": {
         "7zip":                                 "latest",
-        "awscli":                               "latest",
         "adblockpluschrome":                    "latest",
         "arduino":                              "latest",
-        "autohotkey.portable":                  "latest",
+        "awscli":                               "latest",
         "bind-toolsonly":                       "latest",
         "checksum":                             "latest",
         "chocolatey-core.extension":            "latest",
         "chocolatey-windowsupdate.extension":   "latest",
+        "cue":                                  "latest",
         "diffutils":                            "latest",
         "discord.install":                      "latest",
         "filezilla":                            "latest",
@@ -26,7 +26,7 @@
         "openvpn":                              "latest",
         "powershell-core":                      "latest",
         "putty":                                "latest",
-        "python":                               "latest",
+        "python3":                               "3.6.6",
         "radare":                               "latest",
         "spideroakone":                         "latest",
         "synctrayzor":                          "latest",
@@ -45,12 +45,14 @@
     },
 
 	"code-install": [
+        "eamodio.gitlens",
         "ms-python.python",
         "ms-vscode.cpptools",
         "ms-vscode.csharp",
         "ms-vscode.github-issues-prs",
         "ms-vscode.PowerShell",
         "msjsdiag.debugger-for-chrome",
+        "vsciot-vscode.vscode-arduino",
         "vscoss.vscode-ansible"
     ]
 }
