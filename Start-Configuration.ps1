@@ -21,7 +21,7 @@ If ( ( Get-PackageProvider | Select-Object -ExpandProperty Name ) -notcontains '
 
 Write-Host 'Installing or updating required DSC modules.'
 $ModuleList = Get-Module -ListAvailable | Select-Object -ExpandProperty Name
-If ( $ModuleList -notcontains 'ComputerManagementDsc' ){ Install-Module -Name ComputerManagementDscy } Else { Update-Module -Name ComputerManagementDsc }
+If ( $ModuleList -notcontains 'ComputerManagementDsc' ){ Install-Module -Name ComputerManagementDsc } Else { Update-Module -Name ComputerManagementDsc }
 If ( $ModuleList -notcontains 'xSystemSecurity' ){ Install-Module -Name xSystemSecurity } Else { Update-Module -Name xSystemSecurity }
 If ( $ModuleList -notcontains 'xWindowsUpdate' ){ Install-Module -Name xWindowsUpdate } Else { Update-Module -Name xWindowsUpdate }
 If ( $ModuleList -notcontains 'xWinEventLog' ){ Install-Module -Name xWinEventLog } Else { Update-Module -Name xWinEventLog }
